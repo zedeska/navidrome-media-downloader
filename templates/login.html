@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>LOL</title>
+</head>
+<body class="text-white bg-black">
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="text-center bg-blue-700 p-2 w-1/6 mb-2 mt-2 ml-auto mr-auto">
+                {{ messages[0] }}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+   <form method="post" class="flex flex-col ml-auto mr-auto mb-5 w-1/6 gap-2 text-center" action="{{ base_url }}/login">
+    <label class="" for="user" >Username</label>
+    <input class="bg-black border-2 border-violet-700" type="text" name="user">
+    <label for="pass">Password</label>
+    <input class="bg-black border-2 border-violet-700" type="password" name="pass">
+    <input class="border-2 rounded-lg border-violet-900 bg-violet-700" type="submit" value="Login">
+
+</body>
+</html>

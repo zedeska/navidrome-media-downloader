@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>LOL</title>
+</head>
+<body class="text-white bg-black">
+
+   <form method="post" class="flex mb-5 justify-center gap-2" action="{{ base_url }}/">
+    <label class="bg-teal-700 rounded-lg px-2" for="title">Title : </label>
+    <input class="w-3/4 border-2 rounded-lg border-violet-900 bg-violet-700 px-2" type="text" name="title" value="{{ request.form['title'] }}">
+    <select name="type" class="bg-teal-700 rounded-lg px-2">
+        <option selected value="album">Album</option>
+        <option value="track">Track</option>
+    </select>
+    <input class="border-2 rounded-lg border-violet-900 bg-violet-700 px-2 cursor-pointer" type="submit" value="Search">
+   </form>
+
+   {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="text-center bg-blue-700 p-2 w-1/6 mb-2 mt-2 ml-auto mr-auto ">
+                {{ messages[0] }}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+   {% if results is defined %}
+        <div class="flex flex-wrap gap-3 justify-center">
+        {% for result in results %}
+            <div class="text-center border-2 border-violet-700 rounded-lg p-2">
+                {% if 'track' == type %}
+                    <a href="{{ 'https://play.qobuz.com/track/' ~ result['id'] }}" target="_blank">
+                        <img src="{{ result['album']['image']['small'] }}" />
+                        <p>{{ result["title"] }}</p>
+                    </a>
+                    <form action="{{ base_url }}/download" method="post">
+                        <input type="text" name="id" value="{{ result['id'] }}" class="hidden">
+                        <input type="text" name="type" value="{{ type }}" class="hidden">
+                        <input type="text" name="title" value="{{ result['title'] }}" class="hidden">
+                        <input class="cursor-pointer border-2 border-violet-700 rounded-lg p-2 hover:bg-violet-900" type="submit" value="Add">
+                    </form>
+                {% elif type == 'album' %}
+                    <a href="{{ 'https://play.qobuz.com/album/' ~ result['id'] }}" target="_blank">
+                        <img src="{{ result['image']['small'] }}" />
+                        <p>{{ result["title"] }}</p>
+                    </a>
+                    <form action="{{ base_url }}/download" method="post">
+                        <input type="text" name="id" value="{{ result['id'] }}" class="hidden">
+                        <input type="text" name="type" value="{{ type }}" class="hidden">
+                        <input type="text" name="title" value="{{ result['title'] }}" class="hidden">
+                        <input class="cursor-pointer border-2 border-violet-700 rounded-lg p-2 hover:bg-violet-900" type="submit" value="Add">
+                    </form>
+                {% endif %}
+            </div> 
+        {% endfor %}
+        </div>
+    {% endif %}
+</body>
+</html>
