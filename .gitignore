@@ -1,3 +1,5 @@
 conf.toml
 config/
 __pycache__/
+navidrome.db
+path

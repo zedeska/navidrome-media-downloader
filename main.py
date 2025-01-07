@@ -74,7 +74,7 @@ def seah():
 
 
 @bp.route("/", methods=["GET", "POST"])
-@login_required
+#@login_required
 def index():
     if request.method == "POST":
         title = request.form["title"]
@@ -128,6 +128,6 @@ def login():
 app.register_blueprint(bp, url_prefix=conf.base_url)
 
 if __name__ == "__main__":
-    #app.run("127.0.0.1", 4444, debug=True)
+    app.run("127.0.0.1", 4444, debug=True)
 
-    serve(app, host=conf.host, port=conf.port)
+    #serve(app, host=conf.host, port=conf.port)
