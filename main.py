@@ -74,7 +74,7 @@ def seah():
 
 
 @bp.route("/", methods=["GET", "POST"])
-#@login_required
+@login_required
 def index():
     if request.method == "POST":
         title = request.form["title"]
@@ -83,7 +83,7 @@ def index():
     return render_template("index.html", base_url=conf.base_url)
 
 @bp.route("/download", methods=["POST", "GET"])
-#@login_required
+@login_required
 def download():
     data = request.get_json()
     id = data['id']
