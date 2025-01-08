@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, flash, Blueprint
+from flask import Flask, request, render_template, redirect, url_for, flash, Blueprint, jsonify
 from flask_login import LoginManager, login_user, login_required
 from qobuz_dl.qopy import Client
 from qobuz_dl.bundle import Bundle
@@ -74,7 +74,7 @@ def seah():
 
 
 @bp.route("/", methods=["GET", "POST"])
-#@login_required
+@login_required
 def index():
     if request.method == "POST":
         title = request.form["title"]
@@ -85,9 +85,10 @@ def index():
 @bp.route("/download", methods=["POST", "GET"])
 @login_required
 def download():
-    id = request.form['id']
-    type = request.form['type']
-    title = request.form['title']
+    data = request.get_json()
+    id = data['id']
+    type = data['type']
+    title = data['title']
     #print("OUI")
     try:
         qb = QobuzDL(directory=conf.qobuz_download_path, quality=6, embed_art=True, quality_fallback=False, folder_format="{artist} - {album} ({year})", downloads_db=conf.qobuz_db_path)
@@ -96,11 +97,9 @@ def download():
         multiprocessing.Process(target=qb.download_from_id, args=[id, True if type == "album" else False], daemon=True).start()
         #qb.download_from_id(id, album=True if type == "album" else False)
     except Exception as e:
-        flash("{}".format(e))
-        print("ERROR")
-        return redirect(url_for('main.index'))
-    flash(f"{title} : Success")
-    return redirect(url_for('main.index'))
+        return jsonify({"error": "{}".format(e)}), 500
+    #flash(f"{title} : Success")
+    return jsonify({"message": "success for {}".format(title)}), 200
 
 @bp.route("/login", methods=["GET", "POST"])
 def login():
@@ -128,6 +127,6 @@ def login():
 app.register_blueprint(bp, url_prefix=conf.base_url)
 
 if __name__ == "__main__":
-    app.run("127.0.0.1", 4444, debug=True)
+    #app.run("127.0.0.1", 4444, debug=True)
 
-    #serve(app, host=conf.host, port=conf.port)
+    serve(app, host=conf.host, port=conf.port)
