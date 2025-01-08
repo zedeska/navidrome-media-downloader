@@ -74,7 +74,7 @@ def seah():
 
 
 @bp.route("/", methods=["GET", "POST"])
-@login_required
+#@login_required
 def index():
     if request.method == "POST":
         title = request.form["title"]
@@ -83,7 +83,7 @@ def index():
     return render_template("index.html", base_url=conf.base_url)
 
 @bp.route("/download", methods=["POST", "GET"])
-@login_required
+#@login_required
 def download():
     data = request.get_json()
     id = data['id']
@@ -97,7 +97,7 @@ def download():
         multiprocessing.Process(target=qb.download_from_id, args=[id, True if type == "album" else False], daemon=True).start()
         #qb.download_from_id(id, album=True if type == "album" else False)
     except Exception as e:
-        return jsonify({"error": "{}".format(e)}), 500
+        return jsonify({"message": "{}".format(e)}), 500
     #flash(f"{title} : Success")
     return jsonify({"message": "success for {}".format(title)}), 200
 
