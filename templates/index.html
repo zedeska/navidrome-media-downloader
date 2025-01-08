@@ -5,21 +5,25 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <title>LOL</title>
 </head>
-<body class="text-white bg-black text-4xl w-11/12 ml-auto mr-auto">
+<body class="text-white bg-black text-4xl lg:text-xl w-11/12 ml-auto mr-auto">
 
-   <form method="post" class="flex mb-6 justify-center gap-2 mt-8" action="{{ base_url }}">
-    <label class="bg-teal-700 rounded-lg px-2 py-2" for="title">Title : </label>
-    <input class="w-2/4 border-2 rounded-lg py-2 border-violet-900 bg-violet-700 px-2" type="text" name="title" value="{{ request.form['title'] }}">
-    <select name="type" class="bg-teal-700 py-2 rounded-lg px-2">
+   <form method="post" class="flex mb-6 justify-center gap-2 mt-8 lg:mt-6" action="{{ base_url }}">
+    <label class="bg-teal-700 rounded-lg px-2 py-3 lg:py-2" for="title">Title : </label>
+    <input class="w-2/4 border-2 rounded-lg py-2 border-violet-900 bg-violet-700 px-2 lg:py-1" type="text" name="title" value="{{ request.form['title'] }}">
+    <select name="type" class="bg-teal-700 py-2 rounded-lg px-2 lg:py-1">
         <option selected value="album">Album</option>
         <option value="track">Track</option>
     </select>
-    <input class="border-2 rounded-lg border-violet-900 bg-violet-700 py-2 px-2 cursor-pointer" type="submit" value="Search">
+    <input class="border-2 rounded-lg border-violet-900 bg-violet-700 py-2 px-2 cursor-pointer lg:py-1" type="submit" value="Search">
    </form>
+
+   <div id="alertBox" class="hidden text-center p-2 top-12 rounded-lg" style="left: 50%; transform: translate(-50%, 0); transition: display ease-in-out 1s;">
+        <p id="alertBoxMessage"></p>
+   </div>
 
    {% with messages = get_flashed_messages() %}
         {% if messages %}
-            <div class="text-center bg-blue-700 p-2 w-1/6 mb-2 mt-2 ml-auto mr-auto ">
+            <div class="text-center bg-blue-700 p-2 w-1/6 mb-2 mt-2 ml-auto mr-auto">
                 {{ messages[0] }}
             </div>
         {% endif %}
@@ -35,23 +39,13 @@
                             <img class="ml-auto mr-auto" src="{{ result['album']['image']['small'] }}" />
                             <p class="p-2">{{ result["title"] }}</p>
                         </a>
-                        <form action="{{ base_url }}/download" method="post">
-                            <input type="text" name="id" value="{{ result['id'] }}" class="hidden">
-                            <input type="text" name="type" value="{{ type }}" class="hidden">
-                            <input type="text" name="title" value="{{ result['title'] }}" class="hidden">
-                            <input class="cursor-pointer border-2 border-violet-700 rounded-lg p-2 hover:bg-violet-900" type="submit" value="Add">
-                        </form>
+                        <button id="{{ result['id'] }}" class="cursor-pointer border-2 border-violet-700 rounded-lg p-2 hover:bg-violet-900" onclick='DL_request("{{ result["id"] }}", "{{ type }}", "{{ result["title"] }}")'>Add</button>
                     {% elif type == 'album' %}
                         <a href="{{ 'https://play.qobuz.com/album/' ~ result['id'] }}" target="_blank">
                             <img class="ml-auto mr-auto" src="{{ result['image']['small'] }}" />
                             <p class="p-2">{{ result["title"] }}</p>
                         </a>
-                        <form action="{{ base_url }}/download" method="post">
-                            <input type="text" name="id" value="{{ result['id'] }}" class="hidden">
-                            <input type="text" name="type" value="{{ type }}" class="hidden">
-                            <input type="text" name="title" value="{{ result['title'] }}" class="hidden">
-                            <input class="cursor-pointer border-2 border-violet-700 rounded-lg p-2 hover:bg-violet-900" type="submit" value="Add">
-                        </form>
+                            <button id="{{ result['id'] }}" class="cursor-pointer border-2 border-violet-700 rounded-lg p-2 hover:bg-violet-900" onclick='DL_request("{{ result["id"] }}", "{{ type }}", "{{ result["title"] }}")'>Add</button>
                     {% endif %}
                 </div>
             </div> 
@@ -59,4 +53,46 @@
         </div>
     {% endif %}
 </body>
+
+<script>
+
+    function DL_request(id, type, title) {
+        let button = document.getElementById(id);
+        button.style.backgroundColor = "#502d85";
+        button.style.border = "0";
+        button.style.pointerEvents = "none";
+        button.style.cursor = "not-allowed";
+        fetch("/download", {
+            method: "POST",
+            body: JSON.stringify({
+                id: id,
+                type: type,
+                title: title,
+            }),
+            headers: {
+                "Content-type": "application/json"
+            }
+        })
+        .then((response) => response.json())
+        .then((json) => alert(json.message));
+    }
+
+    function hideAlert() {
+        document.getElementById("alertBox").style.display = "none";
+    }
+
+    function alert(message) {
+        let box = document.getElementById("alertBox");
+        let boxText = document.getElementById("alertBoxMessage");
+
+        box.style.display = "block";
+        box.style.position = "fixed";
+        box.style.backgroundColor = "#2b8a32";
+        boxText.innerHTML = message;
+
+        setTimeout(hideAlert, 4000);
+    }
+
+</script>
+
 </html>
