@@ -57,13 +57,13 @@
                     {% elif platform == 'deezer' %}
                         {% if 'track' == type %}
                             <a href="{{ result['link'] }}" target="_blank">
-                                <img class="ml-auto mr-auto" src="https://cdn-images.dzcdn.net/images/cover/{{ result['md5_image'] }}/56x56-000000-80-0-0.jpg" />
+                                <img class="ml-auto mr-auto" src="https://cdn-images.dzcdn.net/images/cover/{{ result['md5_image'] }}/250x250-000000-80-0-0.jpg" />
                                 <p class="p-2">{{ result["title"] }}</p>
                             </a>
                             <button id="{{ result['link'] }}" class="cursor-pointer border-2 border-violet-700 rounded-lg p-2 hover:bg-violet-900" onclick='DL_request("{{ result["link"] }}", "{{ type }}", "{{ result["title"] }}", "{{ platform }}")'>Add</button>
                         {% elif type == 'album' %}
                             <a href="{{ result['link'] }}" target="_blank">
-                                <img class="ml-auto mr-auto" src="{{ result['cover_small'] }}" />
+                                <img class="ml-auto mr-auto" src="{{ result['cover_medium'] }}" />
                                 <p class="p-2">{{ result["title"] }}</p>
                             </a>
                                 <button id="{{ result['link'] }}" class="cursor-pointer border-2 border-violet-700 rounded-lg p-2 hover:bg-violet-900" onclick='DL_request("{{ result["link"] }}", "{{ type }}", "{{ result["title"] }}", "{{ platform }}")'>Add</button>
