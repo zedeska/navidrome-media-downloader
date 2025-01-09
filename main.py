@@ -48,7 +48,7 @@ def index():
         title = request.form["title"]
         type = request.form["type"]
         platform = request.form["platform"]
-        return render_template("index.html", results=search(title, type, platform, client if platform == "qobuz" else None), type=type, base_url=conf.base_url)
+        return render_template("index.html", results=search(title, type, platform, client if platform == "qobuz" else None), type=type, base_url=conf.base_url, platform=platform)
     return render_template("index.html", base_url=conf.base_url)
 
 @bp.route("/download", methods=["POST", "GET"])
