@@ -22,8 +22,8 @@ class FeaturesOption():
 
 DEFAULTS = {
   "downloadLocation": str(localpaths.getMusicFolder()),
-  "tracknameTemplate": "%tracknumber% - %title%",
-  "albumTracknameTemplate": "%tracknumber% - %title%",
+  "tracknameTemplate": "%tracknumber%. %title%",
+  "albumTracknameTemplate": "%tracknumber%. %title%",
   "playlistTracknameTemplate": "%position% - %artist% - %title%",
   "createPlaylistFolder": True,
   "playlistNameTemplate": "%playlist%",
