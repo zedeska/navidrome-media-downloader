@@ -1,7 +1,7 @@
 import binascii
 
-from Cryptodome.Cipher import Blowfish, AES
-from Cryptodome.Hash import MD5
+from Crypto.Cipher import Blowfish, AES
+from Crypto.Hash import MD5
 
 def _md5(data):
     h = MD5.new()

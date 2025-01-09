@@ -16,6 +16,10 @@
         <option selected value="album">Album</option>
         <option value="track">Track</option>
     </select>
+    <select name="platform" class="bg-teal-700 py-2 rounded-lg px-2 lg:py-1">
+        <option selected value="deezer">Deezer</option>
+        <option value="qobuz">Qobuz</option>
+    </select>
     <input class="border-2 rounded-lg border-violet-900 bg-violet-700 py-2 px-2 cursor-pointer lg:py-1" type="submit" value="Search">
    </form>
 
@@ -36,18 +40,34 @@
         {% for result in results %}
             <div class="text-center border-2 border-violet-700 rounded-lg px-1 py-1">
                 <div class="p-4">
-                    {% if 'track' == type %}
-                        <a href="{{ 'https://play.qobuz.com/track/' ~ result['id'] }}" target="_blank">
-                            <img class="ml-auto mr-auto" src="{{ result['album']['image']['small'] }}" />
-                            <p class="p-2">{{ result["title"] }}</p>
-                        </a>
-                        <button id="{{ result['id'] }}" class="cursor-pointer border-2 border-violet-700 rounded-lg p-2 hover:bg-violet-900" onclick='DL_request("{{ result["id"] }}", "{{ type }}", "{{ result["title"] }}")'>Add</button>
-                    {% elif type == 'album' %}
-                        <a href="{{ 'https://play.qobuz.com/album/' ~ result['id'] }}" target="_blank">
-                            <img class="ml-auto mr-auto" src="{{ result['image']['small'] }}" />
-                            <p class="p-2">{{ result["title"] }}</p>
-                        </a>
-                            <button id="{{ result['id'] }}" class="cursor-pointer border-2 border-violet-700 rounded-lg p-2 hover:bg-violet-900" onclick='DL_request("{{ result["id"] }}", "{{ type }}", "{{ result["title"] }}")'>Add</button>
+                    {% if platform == 'qobuz' %}
+                        {% if 'track' == type %}
+                            <a href="{{ 'https://play.qobuz.com/track/' ~ result['id'] }}" target="_blank">
+                                <img class="ml-auto mr-auto" src="{{ result['album']['image']['small'] }}" />
+                                <p class="p-2">{{ result["title"] }}</p>
+                            </a>
+                            <button id="{{ result['id'] }}" class="cursor-pointer border-2 border-violet-700 rounded-lg p-2 hover:bg-violet-900" onclick='DL_request("{{ result["id"] }}", "{{ type }}", "{{ result["title"] }}", "{{ platform }}")'>Add</button>
+                        {% elif type == 'album' %}
+                            <a href="{{ 'https://play.qobuz.com/album/' ~ result['id'] }}" target="_blank">
+                                <img class="ml-auto mr-auto" src="{{ result['image']['small'] }}" />
+                                <p class="p-2">{{ result["title"] }}</p>
+                            </a>
+                                <button id="{{ result['id'] }}" class="cursor-pointer border-2 border-violet-700 rounded-lg p-2 hover:bg-violet-900" onclick='DL_request("{{ result["id"] }}", "{{ type }}", "{{ result["title"] }}", "{{ platform }}")'>Add</button>
+                        {% endif %}
+                    {% elif platform == 'deezer' %}
+                        {% if 'track' == type %}
+                            <a href="{{ result['link'] }}" target="_blank">
+                                <img class="ml-auto mr-auto" src="https://cdn-images.dzcdn.net/images/cover/{{ result['md5_image'] }}/56x56-000000-80-0-0.jpg" />
+                                <p class="p-2">{{ result["title"] }}</p>
+                            </a>
+                            <button id="{{ result['link'] }}" class="cursor-pointer border-2 border-violet-700 rounded-lg p-2 hover:bg-violet-900" onclick='DL_request("{{ result["link"] }}", "{{ type }}", "{{ result["title"] }}", "{{ platform }}")'>Add</button>
+                        {% elif type == 'album' %}
+                            <a href="{{ result['link'] }}" target="_blank">
+                                <img class="ml-auto mr-auto" src="{{ result['cover_small'] }}" />
+                                <p class="p-2">{{ result["title"] }}</p>
+                            </a>
+                                <button id="{{ result['id'] }}" class="cursor-pointer border-2 border-violet-700 rounded-lg p-2 hover:bg-violet-900" onclick='DL_request("{{ result["link"] }}", "{{ type }}", "{{ result["title"] }}", "{{ platform }}")'>Add</button>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div> 
@@ -58,7 +78,7 @@
 
 <script>
 
-    function DL_request(id, type, title) {
+    function DL_request(id, type, title, platform) {
         let button = document.getElementById(id);
         button.style.backgroundColor = "#350088";
         button.style.border = "0";
@@ -74,6 +94,7 @@
                 id: id,
                 type: type,
                 title: title,
+                platform: platform,
             }),
             headers: {
                 "Content-type": "application/json"

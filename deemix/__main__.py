@@ -1,12 +1,10 @@
-#!/usr/bin/env python3
-from init_db import DB
 from pathlib import Path
 
 from deezer import Deezer
 from deezer import TrackFormats
 
 from deemix import generateDownloadObject
-from deemix.settings import load as loadSettings
+from deemix.settings import DEFAULTS
 from deemix.utils import getBitrateNumberFromText, formatListener
 import deemix.utils.localpaths as localpaths
 from deemix.downloader import Downloader
@@ -23,31 +21,37 @@ class LogListener:
         if logString: print(logString)
 
 
-
-def download(url, bitrate, path, workerID, arl, portable=True):
-    #print(url, bitrate, portable, path)
+def download(url, bitrate, path, arl):
     # Check for local configFolder
-    localpath = Path('.')
-    configFolder = localpath / 'config' if portable else localpaths.getConfigFolder()
+    #localpath = Path('.')
+    #configFolder = localpath / 'config' if portable else localpaths.getConfigFolder()
 
-    settings = loadSettings(configFolder)
+    settings = DEFAULTS
     dz = Deezer()
     #listener = LogListener()
 
-    def requestValidArl():
+    """def requestValidArl():
         while True:
             arl = input("Paste here your arl:")
             if dz.login_via_arl(arl.strip()): break
         return arl
 
-    dz.login_via_arl(arl)
+    if (configFolder / '.arl').is_file():
+        with open(configFolder / '.arl', 'r', encoding="utf-8") as f:
+            arl = f.readline().rstrip("\n").strip()
+        if not dz.login_via_arl(arl): arl = requestValidArl()
+    else: arl = requestValidArl()
+    with open(configFolder / '.arl', 'w', encoding="utf-8") as f:
+        f.write(arl)"""
 
-    plugins = {}
+    """plugins = {}
     if Spotify:
         plugins = {
             "spotify": Spotify(configFolder=configFolder)
         }
-        plugins["spotify"].setup()
+        plugins["spotify"].setup()"""
+    
+    dz.login_via_arl(arl)
 
     def downloadLinks(url, bitrate=None):
         if not bitrate: bitrate = settings.get("maxBitrate", TrackFormats.MP3_320)
@@ -63,7 +67,7 @@ def download(url, bitrate, path, workerID, arl, portable=True):
 
         for link in links:
             try:
-                downloadObject = generateDownloadObject(dz, link, bitrate, plugins)
+                downloadObject = generateDownloadObject(dz, link, bitrate)
             except GenerationError as e:
                 print(f"{e.link}: {e.message}")
                 continue
@@ -73,9 +77,9 @@ def download(url, bitrate, path, workerID, arl, portable=True):
                 downloadObjects.append(downloadObject)
 
         for obj in downloadObjects:
-            if obj.__type__ == "Convertable":
-                obj = plugins[obj.plugin].convert(dz, obj, settings)
-            Downloader(dz, obj, settings, workerID).start()
+            """if obj.__type__ == "Convertable":
+                obj = plugins[obj.plugin].convert(dz, obj, settings, listener)"""
+            Downloader(dz, obj, settings).start()
 
 
     if path is not None:
@@ -96,6 +100,3 @@ def download(url, bitrate, path, workerID, arl, portable=True):
             url = f.readlines()
 
     downloadLinks(url, bitrate)
-
-if __name__ == '__main__':
-    download() # pylint: disable=E1120

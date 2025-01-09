@@ -12,8 +12,6 @@ from deemix.utils import USER_AGENT_HEADER
 from deemix.types.DownloadObjects import Single
 from deemix.errors import DownloadCanceled, DownloadEmpty
 
-from init_db import DB
-
 logger = logging.getLogger('deemix')
 
 def generateStreamPath(sng_id, md5, media_version, media_format):
@@ -42,7 +40,7 @@ def reverseStreamURL(url):
     urlPart = url[url.find("/1/")+3:]
     return reverseStreamPath(urlPart)
 
-def streamTrack(outputStream, track, workerID, start=0, downloadObject=None, listener=None):
+def streamTrack(outputStream, track, start=0, downloadObject=None, listener=None):
     if downloadObject and downloadObject.isCanceled: raise DownloadCanceled
     headers= {'User-Agent': USER_AGENT_HEADER}
     chunkLength = start
@@ -97,8 +95,14 @@ def streamTrack(outputStream, track, workerID, start=0, downloadObject=None, lis
                 outputStream.write(chunk)
                 chunkLength += len(chunk)
 
-        DB.query(f"UPDATE tasks SET progress = progress + 1 WHERE id={workerID}")
-
+                if downloadObject:
+                    if isinstance(downloadObject, Single):
+                        chunkProgres = (chunkLength / (complete + start)) * 100
+                        downloadObject.progressNext = chunkProgres
+                    else:
+                        chunkProgres = (len(chunk) / (complete + start)) / downloadObject.size * 100
+                        downloadObject.progressNext += chunkProgres
+                    downloadObject.updateProgress(listener)
 
     except (SSLError, u3SSLError):
         streamTrack(outputStream, track, chunkLength, downloadObject, listener)

@@ -3,3 +3,5 @@ config/
 __pycache__/
 navidrome.db
 path
+songs/
+test.py

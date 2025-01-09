@@ -1,5 +1,4 @@
 from concurrent.futures import ThreadPoolExecutor
-import multiprocessing.pool
 from time import sleep
 import traceback
 
@@ -8,8 +7,6 @@ from os import makedirs, system as execute
 from pathlib import Path
 from shlex import quote
 import errno
-
-import multiprocessing
 
 import logging
 from tempfile import gettempdir
@@ -33,8 +30,6 @@ from deemix.tagger import tagID3, tagFLAC
 from deemix.decryption import generateCryptedStreamURL, streamTrack
 from deemix.settings import OverwriteOption
 from deemix.errors import DownloadFailed, MD5NotFound, DownloadCanceled, PreferredBitrateNotFound, TrackNot360, AlbumDoesntExists, DownloadError, ErrorMessages
-
-from init_db import DB
 
 logger = logging.getLogger('deemix')
 
@@ -206,13 +201,12 @@ def getPreferredBitrate(dz, track, preferredBitrate, shouldFallback, feelingLuck
     return TrackFormats.DEFAULT
 
 class Downloader:
-    def __init__(self, dz, downloadObject, settings, workerID, listener=None):
+    def __init__(self, dz, downloadObject, settings, listener=None):
         self.dz = dz
         self.downloadObject = downloadObject
         self.settings = settings
         self.bitrate = downloadObject.bitrate
         self.listener = listener
-        self.workerID = workerID
 
         self.playlistCoverName = None
         self.playlistURLs = []
@@ -220,7 +214,6 @@ class Downloader:
     def start(self):
         if not self.downloadObject.isCanceled:
             if isinstance(self.downloadObject, Single):
-                DB.query(f"UPDATE tasks SET total = 1 WHERE id={self.workerID}")
                 track = self.downloadWrapper({
                     'trackAPI': self.downloadObject.single.get('trackAPI'),
                     'albumAPI': self.downloadObject.single.get('albumAPI')
@@ -228,15 +221,13 @@ class Downloader:
                 if track: self.afterDownloadSingle(track)
             elif isinstance(self.downloadObject, Collection):
                 tracks = [None] * len(self.downloadObject.collection['tracks'])
-                DB.query(f"UPDATE tasks SET total = {len(tracks)} WHERE id={self.workerID}")
-                with ThreadPoolExecutor(3) as pool:
+                with ThreadPoolExecutor(self.settings['queueConcurrency']) as executor:
                     for pos, track in enumerate(self.downloadObject.collection['tracks'], start=0):
-                        tracks[pos] = pool.submit(self.downloadWrapper, {
+                        tracks[pos] = executor.submit(self.downloadWrapper, {
                             'trackAPI': track,
                             'albumAPI': self.downloadObject.collection.get('albumAPI'),
                             'playlistAPI': self.downloadObject.collection.get('playlistAPI')
                         })
-
                 self.afterDownloadCollection(tracks)
 
         if self.listener:
@@ -292,8 +283,6 @@ class Downloader:
             'artist': track.mainArtist.name
         }
 
-        DB.query("UPDATE tasks SET current='"+str(itemData["title"]).replace("'", " ")+f"' WHERE id={self.workerID}")
-
         # Check if track not yet encoded
         if track.MD5 == '': raise DownloadFailed("notEncoded", track)
 
@@ -338,9 +327,6 @@ class Downloader:
         if self.settings['embeddedArtworkPNG']: embeddedImageFormat = 'png'
 
         track.album.embeddedCoverURL = track.album.pic.getURL(self.settings['embeddedArtworkSize'], embeddedImageFormat)
-
-        DB.query("UPDATE tasks SET cover='"+track.album.embeddedCoverURL+f"' WHERE id={self.workerID}")
-
         ext = track.album.embeddedCoverURL[-4:]
         if ext[0] != ".": ext = ".jpg" # Check for Spotify images
         track.album.embeddedCoverPath = TEMPDIR / ((f"pl{track.playlist.id}" if track.album.isPlaylist else f"alb{track.album.id}") + f"_{self.settings['embeddedArtworkSize']}{ext}")
@@ -425,7 +411,7 @@ class Downloader:
             if not track.downloadURL: raise DownloadFailed('notAvailable', track)
             try:
                 with open(writepath, 'wb') as stream:
-                    streamTrack(stream, track, self.workerID, downloadObject=self.downloadObject, listener=self.listener)
+                    streamTrack(stream, track, downloadObject=self.downloadObject, listener=self.listener)
             except requests.exceptions.HTTPError as e:
                 if writepath.is_file(): writepath.unlink()
                 raise DownloadFailed('notAvailable', track) from e
