@@ -27,7 +27,7 @@ login_manager.init_app(app)
 @login_manager.user_loader
 def load_user(user_id:str):
     try:
-        user_info = get_user_info(user_id=user_id)
+        user_info = get_user_info(conf.navidrome_db ,user_id=user_id)
     except UserNotFound:
         return None
     return User(id=user_info[0], user=user_info[1])
@@ -78,7 +78,7 @@ def login():
         password = request.form["pass"]
 
         try:
-            user_info = get_user_info(username=username)
+            user_info = get_user_info(conf.navidrome_db, username=username)
         except UserNotFound as e:
             flash("{}".format(e))
             return redirect(url_for("main.login"))
