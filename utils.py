@@ -47,10 +47,9 @@ def get_user_info(db_path:str, username:str = None, user_id:str = None):
 def download_qobuz(id, type, dir, db_path, client):
     qb = QobuzDL(directory=dir, quality=6, embed_art=True, quality_fallback=False, folder_format="{artist} - {album} ({year})", downloads_db=db_path)
     qb.client = client
-    multiprocessing.Process(target=qb.download_from_id, args=[id, True if type == "album" else False], daemon=True).start()
+    qb.download_from_id(id, True if type == "album" else False)
     return
 
 def download_deezer(id, dir, arl):
     dm_download([id], 9, dir, arl)
-
-
+    return
