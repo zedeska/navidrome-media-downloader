@@ -10,8 +10,9 @@ class Config():
         self.navidrome_db = None
         self.navidrome_PasswordEncryptionKey = None
 
-        self.qobuz_email = None
+        self.qobuz_email:str = None
         self.qobuz_password = None
+        self.qobuz_token:str = None
         self.qobuz_db_path = None
 
         self.arl = None
@@ -28,8 +29,9 @@ class Config():
         self.navidrome_db = conf["navidrome"]["DbPath"]
         self.navidrome_PasswordEncryptionKey = conf["navidrome"]["PasswordEncryptionKey"]
 
-        self.qobuz_email = conf["qobuz"]["email"]
+        self.qobuz_email:str = conf["qobuz"]["email"]
         self.qobuz_password = conf["qobuz"]["password"]
+        self.qobuz_token:str = conf["qobuz"]["token"]
         self.qobuz_db_path = conf["qobuz"]["DbPath"]
 
         self.arl = conf["deezer"]["arl"]

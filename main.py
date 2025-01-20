@@ -15,7 +15,10 @@ conf.load()
 
 app_id, secrets = get_tokens()
 client = Client(app_id=app_id, secrets=secrets)
-client.auth(conf.qobuz_email, conf.qobuz_password)
+if not conf.qobuz_email:
+    client.auth_token(conf.qobuz_token)
+else:
+    client.auth(conf.qobuz_email, conf.qobuz_password)
 
 app = Flask(__name__)
 bp = Blueprint("main", __name__, template_folder="templates")
