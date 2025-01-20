@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, redirect, url_for, flash, Blu
 from flask_login import LoginManager, login_user, login_required
 from qobuz_dl.qopy import Client
 from qobuz_dl.bundle import Bundle
-from qobuz_dl.core import QobuzDL
+from qobuz_dl.exceptions import *
 from encrypt import decrypt, get_enc_key
 from exceptions import UserNotFound
 from models import User
@@ -68,8 +68,7 @@ def download():
             download_qobuz(id, type, conf.download_path, conf.qobuz_db_path, client)
         elif platform == "deezer":
             download_deezer(id, conf.download_path, conf.arl)
-
-    except Exception as e:
+    except (Exception, NonStreamable) as e:
         return jsonify({"message": "{}".format(e)}), 500
     #flash(f"{title} : Success")
     return jsonify({"message": "success for {}".format(title)}), 200
