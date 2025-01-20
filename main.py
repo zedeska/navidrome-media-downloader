@@ -68,7 +68,7 @@ def download():
             download_qobuz(id, type, conf.download_path, conf.qobuz_db_path, client)
         elif platform == "deezer":
             download_deezer(id, conf.download_path, conf.arl)
-    except (Exception, NonStreamable) as e:
+    except (Exception, NonStreamable, requests.exceptions.RequestException) as e:
         return jsonify({"message": "{}".format(e)}), 500
     #flash(f"{title} : Success")
     return jsonify({"message": "success for {}".format(title)}), 200

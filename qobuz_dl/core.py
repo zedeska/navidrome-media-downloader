@@ -89,24 +89,21 @@ class QobuzDL:
                 "to bypass this."
             )
             return
-        try:
-            dloader = downloader.Download(
-                self.client,
-                item_id,
-                alt_path or self.directory,
-                int(self.quality),
-                self.embed_art,
-                self.ignore_singles_eps,
-                self.quality_fallback,
-                self.cover_og_quality,
-                self.no_cover,
-                self.folder_format,
-                self.track_format,
-            )
-            dloader.download_id_by_type(not album)
-            handle_download_id(self.downloads_db, item_id, add_id=True)
-        except (requests.exceptions.RequestException, NonStreamable) as e:
-            logger.error(f"{RED}Error getting release: {e}. Skipping...")
+        dloader = downloader.Download(
+            self.client,
+            item_id,
+            alt_path or self.directory,
+            int(self.quality),
+            self.embed_art,
+            self.ignore_singles_eps,
+            self.quality_fallback,
+            self.cover_og_quality,
+            self.no_cover,
+            self.folder_format,
+            self.track_format,
+        )
+        dloader.download_id_by_type(not album)
+        handle_download_id(self.downloads_db, item_id, add_id=True)
 
     def handle_url(self, url):
         possibles = {
