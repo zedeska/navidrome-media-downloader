@@ -131,6 +131,14 @@ class Client:
         self.label = usr_info["user"]["credential"]["parameters"]["short_label"]
         logger.info(f"{GREEN}Membership: {self.label}")
 
+    def auth_token(self, token):
+        self.uat = token
+        self.session.headers.update({"X-User-Auth-Token": self.uat})
+        #usr_info = self.api_call("user/login")
+        #if not usr_info["user"]["credential"]["parameters"]:
+            #raise IneligibleError("Free accounts are not eligible to download tracks.")
+        #self.label = usr_info["user"]["credential"]["parameters"]["short_label"]
+
     def multi_meta(self, epoint, key, id, type):
         total = 1
         offset = 0
